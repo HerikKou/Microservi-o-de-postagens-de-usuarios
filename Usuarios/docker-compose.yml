@@ -1,0 +1,32 @@
+services:
+  bancodedados:
+    image: mysql:8
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: perfilusuario
+    ports:
+      - "3306:3306"
+    networks:
+      - private-network
+
+  backend:
+    image: image-usuario
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://bancodedados:3306/perfilusuario
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: 
+    ports:
+      - "8080:8080"
+    depends_on:
+      - bancodedados
+    networks:
+      - private-network
+    volumes:
+      - ./wait-for-it.sh:/app/wait-for-it.sh
+    entrypoint: ["sh", "-c", "bash /app/wait-for-it.sh db:3306 -t 60 -- java -jar app.jar"]
+
+
+
+networks:
+  private-network:
+    driver: bridge
